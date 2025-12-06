@@ -307,26 +307,40 @@ export const generateDailyChallenge = async (): Promise<DailyChallenge> => {
   }
 }
 
+const getMockGradingFeedback = (grade: number, userNotes: string): string => {
+  if (grade < 5) {
+    return "I see the effort! Every dancer has tough days—use this as a learning moment. Focus on your basics and come back tomorrow ready to nail it.";
+  } else if (grade < 8) {
+    return "Nice progress! You're on the right track. Now let's refine those transitions and add more intention to your movements. Small details make big differences.";
+  } else {
+    return "Excellent work! You're really starting to embody the fusion style. Keep this energy up and challenge yourself with more complex choreography next time!";
+  }
+};
+
 export const submitGrading = async (
   activityType: 'Challenge' | 'Workout',
   activityName: string,
-  grade: number, 
+  grade: number,
   userNotes: string
 ): Promise<string> => {
   try {
+    if (!ai) {
+      return getMockGradingFeedback(grade, userNotes);
+    }
+
     const model = 'gemini-2.5-flash';
     const prompt = `
       Role: Maestro (Fusion Dance Coach).
       Task: Provide feedback on a student's daily ${activityType}.
-      
+
       Activity: ${activityName}
       Student's Self-Grade: ${grade}/10.
       Student's Notes: "${userNotes}".
-      
+
       If the grade is low (<5), be encouraging but strict.
       If the grade is medium (5-8), push them to refine.
       If the grade is high (9-10), celebrate.
-      
+
       Keep it short (max 2 sentences).
     `;
 
@@ -337,6 +351,6 @@ export const submitGrading = async (
 
     return result.text || "Good work today. Rest up and come back stronger.";
   } catch (error) {
-    return "Feedback system offline. Good job on practicing!";
+    return getMockGradingFeedback(grade, userNotes);
   }
 }
