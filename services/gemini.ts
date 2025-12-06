@@ -179,14 +179,71 @@ export const generateChoreography = async (
   }
 };
 
+const getMockDailyChallenge = (): DailyChallenge => {
+  return {
+    id: Date.now().toString(),
+    date: new Date().toISOString().split('T')[0],
+    title: "Ballet Meets Beat",
+    description: "Master the art of blending classical ballet's precision with hip-hop's groove. Today's challenge focuses on maintaining perfect posture while adding rhythmic hip isolations.",
+    durationMinutes: 45,
+    focusPoints: [
+      "Keep your core engaged while performing hip isolations",
+      "Maintain turnout from the hips while executing hip-hop moves",
+      "Practice smooth transitions between ballet and hip-hop counts"
+    ],
+    styleMix: [DanceStyle.Ballet, DanceStyle.HipHop],
+    workout: {
+      title: "Fusion Conditioning",
+      focusArea: "Core strength and hip mobility",
+      durationMinutes: 20,
+      exercises: [
+        {
+          name: "Planks",
+          reps: "3 sets of 45 seconds",
+          sets: 3,
+          instruction: "Hold a plank position with your core tight. Focus on a straight line from head to heels."
+        },
+        {
+          name: "Squats",
+          reps: "15 reps",
+          sets: 3,
+          instruction: "Perform controlled squats maintaining turnout. Lower until your thighs are parallel to the ground."
+        },
+        {
+          name: "Lunges",
+          reps: "12 reps per leg",
+          sets: 3,
+          instruction: "Step forward into a lunge, keeping your torso upright. Push through your front heel to return to start."
+        },
+        {
+          name: "Burpees",
+          reps: "10 reps",
+          sets: 2,
+          instruction: "Jump back to plank, do a push-up, jump feet back, and jump up. Explosive power!"
+        },
+        {
+          name: "Sit-ups",
+          reps: "20 reps",
+          sets: 3,
+          instruction: "Keep your neck neutral and engage your core as you lift up. Control the descent."
+        }
+      ]
+    }
+  };
+};
+
 export const generateDailyChallenge = async (): Promise<DailyChallenge> => {
   try {
+    if (!ai) {
+      return getMockDailyChallenge();
+    }
+
     const model = 'gemini-2.5-flash';
     const prompt = `
       Create a "Daily Fusion Dance Plan".
-      
+
       Part 1: A creative dance challenge concept mixing 2 random styles.
-      Part 2: A conditioning workout tailored for dancers. 
+      Part 2: A conditioning workout tailored for dancers.
       It MUST include standard fitness exercises (e.g., Sit-ups, Planks, Push-ups, Squats, Lunges, Burpees) mixed with dance-specific conditioning.
     `;
 
@@ -246,7 +303,7 @@ export const generateDailyChallenge = async (): Promise<DailyChallenge> => {
     throw new Error("Failed to generate daily challenge");
   } catch (error) {
     console.error("Daily Challenge Error", error);
-    throw error;
+    return getMockDailyChallenge();
   }
 }
 
