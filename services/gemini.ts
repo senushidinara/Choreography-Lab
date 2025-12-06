@@ -68,23 +68,70 @@ export const sendMessageToCoach = async (
   }
 };
 
+const getMockChoreography = (
+  styles: DanceStyle[],
+  difficulty: string,
+  songVibe: string
+): GeneratedRoutine => {
+  const mockRoutines: Record<string, GeneratedRoutine> = {
+    default: {
+      title: "Fusion Flow",
+      difficulty: (difficulty as "Beginner" | "Intermediate" | "Advanced") || "Intermediate",
+      vibe: songVibe || "Upbeat and energetic",
+      musicSuggestion: "Contemporary pop with hip-hop beats",
+      steps: [
+        {
+          count: "1-2",
+          action: "Begin in a ballet first position, then rise to relevé",
+          technicalNote: "Keep your core engaged and shoulders relaxed",
+          styleFocus: DanceStyle.Ballet
+        },
+        {
+          count: "3-4",
+          action: "Rotate hips left and right in isolation",
+          technicalNote: "Let the movement flow from your core, not your shoulders",
+          styleFocus: DanceStyle.HipHop
+        },
+        {
+          count: "5-6",
+          action: "Execute a smooth chest roll moving forward",
+          technicalNote: "Isolate each vertebra for fluidity",
+          styleFocus: DanceStyle.Contemporary
+        },
+        {
+          count: "7-8",
+          action: "Finish with a sharp hip check and hold",
+          technicalNote: "Sharp, controlled movement—this is your K-pop moment",
+          styleFocus: DanceStyle.KPop
+        }
+      ]
+    }
+  };
+
+  return mockRoutines.default;
+};
+
 export const generateChoreography = async (
   styles: DanceStyle[],
   difficulty: string,
   songVibe: string
 ): Promise<GeneratedRoutine> => {
   try {
+    if (!ai) {
+      return getMockChoreography(styles, difficulty, songVibe);
+    }
+
     const model = 'gemini-2.5-flash';
 
     const prompt = `
       Create a unique 8-count dance routine (approx 4-8 bars of 8 counts).
-      
+
       Styles to Mix: ${styles.join(', ')}.
       Difficulty: ${difficulty}.
       Song Vibe/Music: ${songVibe}.
-      
+
       The choreography must be a FUSION. For example, do a pirouette that lands in a hip-hop squat, or a jazz drag into a K-pop isolation.
-      
+
       Return JSON format matching the schema provided.
     `;
 
@@ -128,7 +175,7 @@ export const generateChoreography = async (
 
   } catch (error) {
     console.error("Choreo Generation Error:", error);
-    throw error;
+    return getMockChoreography(styles, difficulty, songVibe);
   }
 };
 
