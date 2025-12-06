@@ -36,12 +36,16 @@ const getMockCoachResponse = (message: string): string => {
 };
 
 export const sendMessageToCoach = async (
-  history: Message[], 
+  history: Message[],
   newMessage: string
 ): Promise<string> => {
   try {
+    if (!ai) {
+      return getMockCoachResponse(newMessage);
+    }
+
     const model = 'gemini-2.5-flash';
-    
+
     // Construct prompt from history
     const chatHistory = history.map(h => ({
       role: h.role,
@@ -60,7 +64,7 @@ export const sendMessageToCoach = async (
     return result.text || "I'm focusing on the beat, ask me again.";
   } catch (error) {
     console.error("Coach Error:", error);
-    return "Let's take a 5-minute break. I'm having trouble connecting to the rhythm (API Error).";
+    return getMockCoachResponse(newMessage);
   }
 };
 
