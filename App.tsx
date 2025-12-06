@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import { Navigation } from './components/Navigation';
 import { ChatInterface } from './components/ChatInterface';
 import { ChoreoGenerator } from './components/ChoreoGenerator';
+import { DailyRoutine } from './components/DailyRoutine';
 import { ViewState } from './types';
-import { PlayCircle, Award, Users } from 'lucide-react';
+import { PlayCircle, Award, Users, CalendarCheck } from 'lucide-react';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('home');
 
   const renderContent = () => {
     switch (currentView) {
+      case 'daily':
+        return <DailyRoutine />;
       case 'coach':
         return <ChatInterface />;
       case 'generator':
@@ -66,10 +69,23 @@ const HomeView: React.FC<{ onChangeView: (view: ViewState) => void }> = ({ onCha
           Pulse & Plié is your AI-powered personal coach. Blend the discipline of Ballet with the grit of Hip Hop and the flair of K-Pop. Generate unique routines and get technical feedback instantly.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl">
+          <div 
+            onClick={() => onChangeView('daily')}
+            className="group cursor-pointer bg-panel-gray/60 backdrop-blur-sm border border-gray-700 p-6 rounded-2xl hover:bg-gray-800 hover:border-white transition-all duration-300 transform hover:-translate-y-1"
+          >
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <CalendarCheck size={24} className="text-black" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Daily Challenge</h3>
+            <p className="text-sm text-gray-400 group-hover:text-gray-300">
+                Start your day with a randomly generated fusion exercise and grade your performance.
+            </p>
+          </div>
+
           <div 
             onClick={() => onChangeView('coach')}
-            className="group cursor-pointer bg-panel-gray/60 backdrop-blur-sm border border-gray-700 p-6 rounded-2xl hover:bg-gray-800 hover:border-hiphop-neon transition-all duration-300"
+            className="group cursor-pointer bg-panel-gray/60 backdrop-blur-sm border border-gray-700 p-6 rounded-2xl hover:bg-gray-800 hover:border-hiphop-neon transition-all duration-300 transform hover:-translate-y-1"
           >
             <div className="w-12 h-12 bg-jazz-purple rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Users size={24} className="text-white" />
@@ -85,7 +101,7 @@ const HomeView: React.FC<{ onChangeView: (view: ViewState) => void }> = ({ onCha
 
           <div 
             onClick={() => onChangeView('generator')}
-            className="group cursor-pointer bg-panel-gray/60 backdrop-blur-sm border border-gray-700 p-6 rounded-2xl hover:bg-gray-800 hover:border-kpop-blue transition-all duration-300"
+            className="group cursor-pointer bg-panel-gray/60 backdrop-blur-sm border border-gray-700 p-6 rounded-2xl hover:bg-gray-800 hover:border-kpop-blue transition-all duration-300 transform hover:-translate-y-1"
           >
             <div className="w-12 h-12 bg-kpop-blue rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <PlayCircle size={24} className="text-black" />

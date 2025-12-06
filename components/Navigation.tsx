@@ -1,6 +1,6 @@
 import React from 'react';
 import { ViewState } from '../types';
-import { Mic2, Music4, MessageSquare, LayoutGrid, Radio } from 'lucide-react';
+import { Mic2, Music4, MessageSquare, LayoutGrid, Radio, CalendarCheck } from 'lucide-react';
 
 interface NavigationProps {
   currentView: ViewState;
@@ -10,6 +10,7 @@ interface NavigationProps {
 export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeView }) => {
   const navItems = [
     { id: 'home', label: 'Studio Home', icon: LayoutGrid },
+    { id: 'daily', label: 'Daily Challenge', icon: CalendarCheck },
     { id: 'coach', label: 'Coach Maestro', icon: MessageSquare },
     { id: 'generator', label: 'Create Choreo', icon: Music4 },
     { id: 'library', label: 'My Routines', icon: Radio }, // Placeholder for saved

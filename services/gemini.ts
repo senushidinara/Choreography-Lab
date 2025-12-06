@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { DanceStyle, GeneratedRoutine, Message, RoutineStep } from "../types";
+import { DanceStyle, GeneratedRoutine, Message, RoutineStep, DailyChallenge } from "../types";
 
 const apiKey = process.env.API_KEY || '';
 const ai = new GoogleGenAI({ apiKey });
@@ -32,11 +32,6 @@ export const sendMessageToCoach = async (
       parts: [{ text: h.content }],
     }));
 
-    // We use generateContent for a single turn here effectively by passing context, 
-    // but using ai.chats is cleaner if we persisted the object. 
-    // Since this is a stateless request wrapper, we'll use generateContent with system instruction context 
-    // implicitly handled by how we prompt or simple chat usage.
-    
     const chat = ai.chats.create({
       model,
       config: {
@@ -116,3 +111,108 @@ export const generateChoreography = async (
     throw error;
   }
 };
+
+export const generateDailyChallenge = async (): Promise<DailyChallenge> => {
+  try {
+    const model = 'gemini-2.5-flash';
+    const prompt = `
+      Create a "Daily Fusion Dance Plan".
+      
+      Part 1: A creative dance challenge concept mixing 2 random styles.
+      Part 2: A conditioning workout tailored for dancers. 
+      It MUST include standard fitness exercises (e.g., Sit-ups, Planks, Push-ups, Squats, Lunges, Burpees) mixed with dance-specific conditioning.
+    `;
+
+    const responseSchema: Schema = {
+      type: Type.OBJECT,
+      properties: {
+        id: { type: Type.STRING },
+        date: { type: Type.STRING },
+        title: { type: Type.STRING },
+        description: { type: Type.STRING, description: "Brief description of the dance challenge." },
+        durationMinutes: { type: Type.NUMBER },
+        focusPoints: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3 bullet points on technique" },
+        styleMix: { type: Type.ARRAY, items: { type: Type.STRING, enum: Object.values(DanceStyle) } },
+        workout: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING },
+            focusArea: { type: Type.STRING },
+            durationMinutes: { type: Type.NUMBER },
+            exercises: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  name: { type: Type.STRING },
+                  reps: { type: Type.STRING },
+                  sets: { type: Type.NUMBER },
+                  instruction: { type: Type.STRING }
+                },
+                required: ["name", "reps", "sets", "instruction"]
+              }
+            }
+          },
+          required: ["title", "focusArea", "exercises", "durationMinutes"]
+        }
+      },
+      required: ["title", "description", "focusPoints", "styleMix", "workout"]
+    };
+
+    const result = await ai.models.generateContent({
+      model,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: responseSchema,
+      }
+    });
+
+    if (result.text) {
+      const data = JSON.parse(result.text);
+      return {
+        ...data,
+        id: Date.now().toString(),
+        date: new Date().toISOString().split('T')[0]
+      };
+    }
+    throw new Error("Failed to generate daily challenge");
+  } catch (error) {
+    console.error("Daily Challenge Error", error);
+    throw error;
+  }
+}
+
+export const submitGrading = async (
+  activityType: 'Challenge' | 'Workout',
+  activityName: string,
+  grade: number, 
+  userNotes: string
+): Promise<string> => {
+  try {
+    const model = 'gemini-2.5-flash';
+    const prompt = `
+      Role: Maestro (Fusion Dance Coach).
+      Task: Provide feedback on a student's daily ${activityType}.
+      
+      Activity: ${activityName}
+      Student's Self-Grade: ${grade}/10.
+      Student's Notes: "${userNotes}".
+      
+      If the grade is low (<5), be encouraging but strict.
+      If the grade is medium (5-8), push them to refine.
+      If the grade is high (9-10), celebrate.
+      
+      Keep it short (max 2 sentences).
+    `;
+
+    const result = await ai.models.generateContent({
+      model,
+      contents: prompt,
+    });
+
+    return result.text || "Good work today. Rest up and come back stronger.";
+  } catch (error) {
+    return "Feedback system offline. Good job on practicing!";
+  }
+}

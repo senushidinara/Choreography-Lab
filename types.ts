@@ -28,4 +28,29 @@ export interface GeneratedRoutine {
   musicSuggestion: string;
 }
 
-export type ViewState = 'home' | 'coach' | 'generator' | 'library';
+export interface WorkoutExercise {
+  name: string;
+  reps: string;
+  sets: number;
+  instruction: string;
+}
+
+export interface DailyWorkout {
+  title: string;
+  focusArea: string;
+  exercises: WorkoutExercise[];
+  durationMinutes: number;
+}
+
+export interface DailyChallenge {
+  id: string;
+  date: string;
+  title: string;
+  description: string;
+  durationMinutes: number;
+  focusPoints: string[];
+  styleMix: DanceStyle[];
+  workout: DailyWorkout;
+}
+
+export type ViewState = 'home' | 'coach' | 'generator' | 'library' | 'daily';
