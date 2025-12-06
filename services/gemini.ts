@@ -2,11 +2,15 @@ import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { DanceStyle, GeneratedRoutine, Message, RoutineStep, DailyChallenge } from "../types";
 
 const apiKey = process.env.API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
+let ai: any = null;
+
+if (apiKey) {
+  ai = new GoogleGenAI({ apiKey });
+}
 
 // System instruction for the chat coach
 const COACH_SYSTEM_INSTRUCTION = `
-You are "Maestro", a world-class fusion dance coach. 
+You are "Maestro", a world-class fusion dance coach.
 Your expertise implies a deep understanding of:
 1. Classical Ballet (Technique, French terminology, posture)
 2. Contemporary (Fluidity, floor work, emotional expression)
@@ -18,6 +22,18 @@ You speak with a mix of strict technical discipline (Ballet) and hype/energy (Hi
 Always encourage the student but point out technical corrections.
 When explaining moves, use proper terminology but explain it simply if it's complex.
 `;
+
+// Mock coach responses for when API key is unavailable
+const getMockCoachResponse = (message: string): string => {
+  const responses = [
+    "That's a solid question! Remember, in fusion dancing, we blend the precision of ballet with the groove of hip-hop. Keep your core engaged and let the rhythm guide your movements.",
+    "I love your energy! Let me give you some pointers: focus on your isolations—they're key to making those K-pop moves pop. Check your shoulder rolls and make sure your hips stay locked.",
+    "Great attempt! Here's what I noticed: your turns need more spotting, and in hip-hop sections, embrace the bounce more. The connection between ballet technique and hip-hop flow is what makes fusion special.",
+    "Nice work! One thing to refine: when transitioning between styles, don't lose momentum. Use your plié to absorb the energy from a hip-hop move into a smooth ballet extension.",
+    "You've got the foundation! Now let's talk style fusion. Try adding a contemporary floor element to your jazz phrase—it'll give you a fresh take. Remember, fusion is about creative storytelling through movement."
+  ];
+  return responses[Math.floor(Math.random() * responses.length)];
+};
 
 export const sendMessageToCoach = async (
   history: Message[], 
